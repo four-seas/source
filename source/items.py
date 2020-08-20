@@ -55,3 +55,22 @@ class MysqlItem(BaseItem):
         :return:
         """
         pass
+
+
+class ImageItem(metaclass=ABCMeta):
+    image_urls = scrapy.Field()
+    images = scrapy.Field()
+    image_paths = scrapy.Field()
+
+    def get_images_headers(self):
+        return {
+            'upgrade-insecure-requests': 1,
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'accept-encoding': 'gzip, deflate, sdch, br',
+            'accept-language': 'zh-CN,zh;q=0.9',
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
+        }
+
+    @abstractmethod
+    def get_image_dir(self):
+        pass

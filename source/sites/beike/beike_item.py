@@ -4,12 +4,12 @@ __date__ = '20/8/19 0:20'
 import scrapy
 from scrapy.loader.processors import Compose
 from source.utils.processors import FirstAndTrim, ExtractValidContent
-from source.items import MysqlItem
+from source.items import MysqlItem, ImageItem
 from source.utils.mysql_utils import *
 from source.utils.strings_utils import *
 
 
-class BeikeItem(scrapy.Item, MysqlItem):
+class BeikeItem(scrapy.Item, MysqlItem, ImageItem):
     table_name = 'houses'
 
     field_list = [
@@ -72,6 +72,11 @@ class BeikeItem(scrapy.Item, MysqlItem):
     spider_src_url = scrapy.Field()
     spider_type = scrapy.Field()
 
+    # image-pipeline
+    image_urls = scrapy.Field()
+    images = scrapy.Field()
+    image_paths = scrapy.Field()
+
     def clean_data(self):
 
         self['total_price'] = get_nums(self['total_price'])
@@ -100,6 +105,9 @@ class BeikeItem(scrapy.Item, MysqlItem):
         sql_params = eval(params_eval)
 
         return insert_sql, sql_params
+
+    def get_image_dir(self):
+        return 'beike'
 
     def help_fields(self):
         for field in self.fields:

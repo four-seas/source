@@ -65,7 +65,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # 'source.pipelines.SourcePipeline': 300,
+    'source.pipelines.ImgDownloadPipeline': 200,
     'source.pipelines.MysqlTwistedPipeline': 300,
 }
 
@@ -103,3 +103,8 @@ SQL_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 SQL_DATE_FORMAT = "%Y-%m-%d"
 
 RANDOM_UA_TYPE = "random"
+
+# 设置图片下载路径
+IMAGES_STORE = './images'
+# 过期天数
+IMAGES_EXPIRES = 90  # 90天内抓取的都不会被重抓

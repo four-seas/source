@@ -15,7 +15,6 @@ class BeikeSpider(scrapy.Spider):
     allowed_domains = ['gz.ke.com']
     start_urls = ['https://gz.ke.com/ershoufang/']
     type = 1
-
     headers = {
         "HOST": "gz.ke.com",
         "Referer": "https://gz.ke.com",
@@ -83,6 +82,9 @@ class BeikeSpider(scrapy.Spider):
         item_loader.add_xpath('establish', "//div[@class='area']/div[@class='subInfo']/text()")  # ['1998年建/塔楼']
         item_loader.add_value('spider_src_url', response.url)
         item_loader.add_value('spider_type', self.type)
+
+        # images-pipeline
+        item_loader.add_xpath('image_urls', "//div[@data-component='housePhotos']//img/@src")  # ['https://ke-image.ljcdn.com/110000-inspection/pc1_3VySlUq58_1.jpg!m_fill,w_710,h_400,lg_north_west,lx_0,ly_0,l_fbk,f_jpg,ls_50?from=ke.com']
 
         # 向下抓取小区地址
         addr_url = extract_schema_domain_from_url(response.url) + response.xpath(
