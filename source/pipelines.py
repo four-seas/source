@@ -12,6 +12,8 @@ from scrapy.http import Request
 from scrapy.utils.python import to_bytes
 import hashlib
 import scrapy
+from scrapy.loader import ItemLoader
+from source.sites.common.save_images_item import SaveImagesItem
 
 
 class MysqlTwistedPipeline(object):
@@ -50,15 +52,28 @@ class MysqlTwistedPipeline(object):
         # 添加自己的处理异常的函数
         query.addErrback(self.handle_error, item, spider)
 
+        # 最后一个pipeline，那么该item将会在终端输出，否则将传递给下一个pipeline
+        # return item
+
     def do_insert(self, cursor, item):
         """
         执行具体的插入
         根据不同的item 构建不同的sql语句并插入到mysql中
         """
         insert_sql, params = item.save_to_mysql()
-        res = cursor.execute(insert_sql, params)
-        print(item)
-        print(cursor.lastrowid)
+        affect_row = cursor.execute(insert_sql, params)
+
+        inserted_id = cursor.lastrowid
+
+        for url_path in item['image_paths']:
+            item_loader = ItemLoader(item=SaveImagesItem())
+            item_loader.add_value('house_id', inserted_id)
+            item_loader.add_value('path', url_path[1])
+            item_loader.add_value('url', url_path[0])
+            save_image_item = item_loader.load_item()
+            insert_sql, params = save_image_item.save_to_mysql()
+
+            affect_row = cursor.execute(insert_sql, params)
 
     @staticmethod
     def handle_error(failure, item, spider):
@@ -75,7 +90,7 @@ class ImgDownloadPipeline(ImagesPipeline):
         images_urls = [x for x in item['image_urls'] if x != '']
         self.image_dir = item.get_image_dir()
         for image_url in images_urls:
-            # 加了反而下载失败
+            # cdn加了反而下载失败
             # headers['referer'] = image_url
             yield scrapy.Request(image_url, headers=headers)
 
@@ -88,8 +103,10 @@ class ImgDownloadPipeline(ImagesPipeline):
          (False,
           Failure(...))]
         """
-        image_paths = [x['path'] for ok, x in results if ok]
+        image_paths = [(x['url'], x['path']) for ok, x in results if ok]
+
         item['image_paths'] = image_paths
+
         return item
 
     def file_path(self, request, response=None, info=None):
