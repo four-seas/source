@@ -1,5 +1,5 @@
 __author__ = 'ccinn'
-__date__ = '20/8/19 0:20'
+__date__ = '20/8/20 0:20'
 
 import scrapy
 from scrapy.loader.processors import Compose
@@ -9,7 +9,7 @@ from source.utils.mysql_utils import *
 from source.utils.strings_utils import *
 
 
-class BeikeItem(scrapy.Item, MysqlItem, ImageItem):
+class ImagesItem(scrapy.Item, MysqlItem, ImageItem):
     table_name = 'houses'
 
     field_list = [
