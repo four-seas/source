@@ -2,6 +2,8 @@ FROM python:3.7-buster
 
 WORKDIR /www
 
-ADD requirements.txt /www
+ADD ./ /www
 
-RUN cd /www && pip install -r ./requirements.txt
+RUN pip install -i https://pypi.douban.com/simple --default-timeout=100 -r ./requirements.txt
+
+CMD ['sh', '-c', 'scrapy crawl beike']

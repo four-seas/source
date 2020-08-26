@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: beike
+spec:
+  template:
+    metadata:
+      name: crawl
+    spec:
+      containers:
+      - name: source-beike
+        build:
+          context: ./
+          dockerfile: Dockerfile
+        command: ["sh",  "-c", "scrapy crawl beike"]
+        volumeMounts:
+          - mountPath: /www
+            name: source-app-volume
+      - name: source-mysql
+        image: 'mysql:5.7'
+        command: '--default-authentication-plugin=mysql_native_password'
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: '123456'
+          - name: MYSQL_DATABASE
+            value: 'four_seas'
+          - name: TZ
+            value: 'UTC'
+        volumeMounts:
+          - mountPath: /docker-entrypoint-initdb.d
+            name: mysql-sql-volume
+      volumes:
+         - name: mysql-sql-volume
+           hostPath:
+             path: ./initdb.d
+         - name: source-app-volume
+           hostPath:
+             path: ./
+      restartPolicy: Never
