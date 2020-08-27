@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-source
+  labels:
+    type: local
+spec:
+  storageClassName: pv-source-sc
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/Users/caiwenhui/www/local/four-seas/source/initdb.d"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-source
+spec:
+  storageClassName: pv-source-sc
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: beike
+spec:
+  template:
+    metadata:
+      name: crawl
+    spec:
+      containers:
+        - name: source-mysql
+          image: 'mysql:5.7'
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: '123456'
+            - name: MYSQL_DATABASE
+              value: 'four_seas'
+            - name: TZ
+              value: 'UTC'
+          volumeMounts:
+            - mountPath: '/docker-entrypoint-initdb.d/'
+              name: mysql-sql-volume
+        - name: source-beike
+          image: 'fourseas/source:latest'
+          command: ["sh", "-c", "pwd;ls -l"]
+#          command: ["sh", "-c", "pwd;ls -l;&&sed -i -e '/^MYSQL_HOST/s/mysql/local/g' -e '/^MYSQL_HOST/s/host.docker.internal/local/g' config.py && scrapy crawl beike"]
+#          volumeMounts:
+#            - mountPath: /www
+#              name: source-app-volume
+      volumes:
+        - name: mysql-sql-volume
+          persistentVolumeClaim:
+            claimName: pvc-source
+        - name: source-app-volume
+          hostPath:
+            path: /Users/caiwenhui/www/local/four-seas/source
+            type: Directory
+
+      restartPolicy: Never

@@ -132,3 +132,4 @@ config.py
 source/__pycache__/
 */__pycache__/
 images/
+pv*.yaml
