@@ -8,32 +8,29 @@ spec:
       name: crawl
     spec:
       containers:
-      - name: source-beike
-        build:
-          context: ./
-          dockerfile: Dockerfile
-        command: ["sh",  "-c", "scrapy crawl beike"]
-        volumeMounts:
-          - mountPath: /www
-            name: source-app-volume
-      - name: source-mysql
-        image: 'mysql:5.7'
-        command: '--default-authentication-plugin=mysql_native_password'
-        env:
-          - name: MYSQL_ROOT_PASSWORD
-            value: '123456'
-          - name: MYSQL_DATABASE
-            value: 'four_seas'
-          - name: TZ
-            value: 'UTC'
-        volumeMounts:
-          - mountPath: /docker-entrypoint-initdb.d
-            name: mysql-sql-volume
+        - name: source-mysql
+          image: 'mysql:5.7'
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: '123456'
+            - name: MYSQL_DATABASE
+              value: 'four_seas'
+            - name: TZ
+              value: 'UTC'
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d
+              name: mysql-sql-volume
+        - name: source-beike
+          image: 'fourseas/source:latest'
+          command: ["sh", "-c", "scrapy crawl beike"]
+          volumeMounts:
+            - mountPath: /www
+              name: source-app-volume
       volumes:
-         - name: mysql-sql-volume
-           hostPath:
-             path: ./initdb.d
-         - name: source-app-volume
-           hostPath:
-             path: ./
+        - name: mysql-sql-volume
+          hostPath:
+            path: initdb.d
+        - name: source-app-volume
+          hostPath:
+            path: /Users/caiwenhui/www/local/four-seas/source
       restartPolicy: Never
