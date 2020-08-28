@@ -1,34 +1,6 @@
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv-source
-  labels:
-    type: local
-spec:
-  storageClassName: pv-source-sc
-  capacity:
-    storage: 2Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/Users/caiwenhui/www/local/four-seas/source/initdb.d"
-
----
-
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: pvc-source
-spec:
-  storageClassName: pv-source-sc
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-
----
-
+# 由于k8s磁盘挂载需要使用绝对路径
+# 所以此模板是我本人的磁盘目录，需要对应修改spec.template.volumes.*的路径
+# sed -i "s#"$(PWD)"#{your's current dir path}#g" k8s-job.yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -55,18 +27,17 @@ spec:
               name: mysql-sql-volume
         - name: source-beike
           image: 'fourseas/source:latest'
-          command: ["sh", "-c", "pwd;ls -l"]
-#          command: ["sh", "-c", "pwd;ls -l;&&sed -i -e '/^MYSQL_HOST/s/mysql/local/g' -e '/^MYSQL_HOST/s/host.docker.internal/local/g' config.py && scrapy crawl beike"]
+          command: ["sh", "-c", "cp config_template.py config.py;sed -i -e \"/^MYSQL_HOST/s/''/'127.0.0.1'/g\" -e \"/^MYSQL_PORT/s/''/3306/g\" -e \"/^MYSQL_DBNAME/s/''/'four_seas'/g\" -e \"/^MYSQL_USER/s/''/'root'/g\" -e \"/^MYSQL_PASSWORD/s/''/'123456'/g\" config.py && scrapy crawl beike"]
+          # 如果需要挂载本地代码则取消注释
 #          volumeMounts:
 #            - mountPath: /www
 #              name: source-app-volume
       volumes:
         - name: mysql-sql-volume
-          persistentVolumeClaim:
-            claimName: pvc-source
+          hostPath:
+            path: /Users/caiwenhui/www/local/four-seas/source/initdb.d
         - name: source-app-volume
           hostPath:
             path: /Users/caiwenhui/www/local/four-seas/source
-            type: Directory
 
       restartPolicy: Never
