@@ -20,8 +20,11 @@ class GovMcItem(scrapy.Item, MysqlItem):
     ]
 
     duplicate_key_update = [
-        'unit_number', 'date',
-        'project_id'
+        'attachment',
+        'project_id', 'unit_number',
+        'unit_type', 'unit_total_area',
+        'unit_house_type', 'status',
+        'charge', 'date'
     ]
 
     attachment = scrapy.Field(
@@ -74,11 +77,9 @@ class GovMcItem(scrapy.Item, MysqlItem):
         self['unit_number'] = int(self['unit_number'])
         self['unit_type'] = self.unit_type_enums[self['unit_type']]
 
-        self['project_id'] = 1
         self['date'] = str(datetime.date.today())
 
     def save_to_mysql(self):
-
         insert_sql, params_eval, _, _ = create_insert_sql(self.field_list, self.duplicate_key_update, self.table_name)
         self.clean_data()
         sql_params = eval(params_eval)

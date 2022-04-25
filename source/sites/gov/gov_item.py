@@ -1,6 +1,9 @@
 __author__ = 'ccinn'
 __date__ = '22/4/21 0:20'
 
+import time
+from datetime import datetime
+
 import scrapy
 from source.utils.processors import FirstAndTrim
 from source.items import MysqlItem
@@ -11,20 +14,36 @@ class GovProjectItem(scrapy.Item, MysqlItem):
     table_name = 'project'
 
     field_list = [
+        'pid',
         'name',
-        'developer', 'licence',
+        'developer', 'developer_id', 'licence',
         'sold_out', 'unsold',
-        'supervision', 'area',
+        'supervision',
         'create_time', 'address',
-        'update_time'
+        'update_time',
+
+        'send_licence',
+        'charge'
     ]
 
     duplicate_key_update = [
-        'licence', 'developer',
-        'name'
+        'name',
+        'developer',  'licence',
+        'sold_out', 'unsold',
+        'supervision', 'address',
+        'update_time',
+
+        'send_licence',
+        'charge'
     ]
 
+    pid = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
     name = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    developer_id = scrapy.Field(
         output_processor=FirstAndTrim()
     )
     developer = scrapy.Field(
@@ -45,12 +64,35 @@ class GovProjectItem(scrapy.Item, MysqlItem):
     create_time = scrapy.Field(
         output_processor=FirstAndTrim()
     )
+    update_time = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
     address = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    send_licence = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    charge = scrapy.Field(
         output_processor=FirstAndTrim()
     )
 
     def clean_data(self):
-        pass
+        self['licence'] = int(self['licence']) if hasattr(self, 'licence') else 0
+        self['sold_out'] = int(self['sold_out'])
+        self['unsold'] = int(self['unsold'])
+        self['supervision'] = self['supervision'] if hasattr(self, 'supervision') else ''
+
+        if not hasattr(self, 'send_licence'):
+            self['send_licence'] = ''
+        else:
+            self['send_licence'] = datetime.strftime(datetime.strptime(self['send_licence'], '%b %d, %Y'), '%Y-%m-%d') if self[
+                                                                                                                              'send_licence'] is not None else ''
+        if not hasattr(self, 'charge'):
+            self['charge'] = ''
+
+        self['create_time'] = int(time.time())
+        self['update_time'] = int(time.time())
 
     def save_to_mysql(self):
         insert_sql, params_eval, _, _ = create_insert_sql(self.field_list, self.duplicate_key_update, self.table_name)
