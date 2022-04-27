@@ -35,7 +35,8 @@ if __name__ == '__main__':
     worksheets = []
     worksheets.append(workbook.add_worksheet('当天各幢备案统计'))
     worksheets.append(workbook.add_worksheet('所有幢备案汇总'))
-    worksheets.append(workbook.add_worksheet('今天对比昨天新增备案户'))
+    worksheets.append(workbook.add_worksheet('对比昨天新增备案户'))
+    worksheets.append(workbook.add_worksheet('对比昨天新增备数量'))
     worksheets.append(workbook.add_worksheet('累户已备案业主'))
     worksheets.append(workbook.add_worksheet('查看已出预售证监管账号'))
 
@@ -78,7 +79,7 @@ order by
     sqls.append(sql)
 
     sql = """
--- 今天对比昨天新增备案户 
+-- 对比昨天新增备案户 
 select 
   b.`building` as '幢', 
   b.unit_number as '房号' 
@@ -100,6 +101,35 @@ order by
   b.area asc, 
   b.area_number asc;
         """
+    sqls.append(sql)
+
+    sql = """
+-- 对比昨天各幢新增备案数
+select 
+  `building` as '幢', 
+  count(1) as '数量' 
+from 
+  (
+    select 
+      b.`building` 
+    from 
+      market_control as a 
+      inner join market_control as b on a.project_id = b.project_id 
+      and a.building_id = b.building_id 
+      and a.unit_number = b.unit_number 
+    where 
+      b.date = curdate() 
+      and a.date = DATE_SUB(
+        CURDATE(), 
+        INTERVAL 1 DAY
+      ) 
+      and b.recordtion = 1 
+      and a.recordtion = 0 
+      and b.unit_type = 2
+  ) as t 
+group by 
+  `building`;
+            """
     sqls.append(sql)
 
     sql = """
