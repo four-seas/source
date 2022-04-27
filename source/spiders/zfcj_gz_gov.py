@@ -255,6 +255,13 @@ class ZfcjGzGovSpider(scrapy.Spider):
         pid = item['projectId']
         building_id = item['building_id']
         building = item['building'] if str(item['building_id']) != '100000121046' else 'J3'
+        area = ''
+        area_number = '0'
+        try:
+            area = building[0]
+            area_number = building[1:]
+        except ValueError:
+            pass
         address = item['address']
         beian_list = item['beian_list']
         # ['房号', '类型', '总面积（平方米）', '户型', '状态', '抵押', '查封']
@@ -277,6 +284,8 @@ class ZfcjGzGovSpider(scrapy.Spider):
             item_loader.add_value('building_id', building_id)
             item_loader.add_value('building', building)
             item_loader.add_value('address', address)
+            item_loader.add_value('area', area)
+            item_loader.add_value('area_number', area_number)
             if beian_list[idx].find('■') != -1:
                 item_loader.add_value('recordtion', '1')
             else:

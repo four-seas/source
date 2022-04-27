@@ -20,7 +20,9 @@ class GovMcItem(scrapy.Item, MysqlItem):
         'building_id',
         'building',
         'address',
-        'recordtion'
+        'recordtion',
+        'area',
+        'area_number'
     ]
 
     duplicate_key_update = [
@@ -28,7 +30,9 @@ class GovMcItem(scrapy.Item, MysqlItem):
         'unit_type', 'unit_total_area',
         'unit_house_type', 'status',
         'recordtion',
-        'charge', 'address'
+        'charge', 'address',
+        'area',
+        'area_number'
     ]
 
     attachment = scrapy.Field(
@@ -68,6 +72,12 @@ class GovMcItem(scrapy.Item, MysqlItem):
         output_processor=FirstAndTrim()
     )
     recordtion = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    area = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    area_number = scrapy.Field(
         output_processor=FirstAndTrim()
     )
 
