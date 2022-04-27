@@ -16,15 +16,19 @@ class GovMcItem(scrapy.Item, MysqlItem):
         'project_id', 'unit_number',
         'unit_type', 'unit_total_area',
         'unit_house_type', 'status',
-        'charge', 'date'
+        'charge', 'date',
+        'building_id',
+        'building',
+        'address',
+        'recordtion'
     ]
 
     duplicate_key_update = [
         'attachment',
-        'project_id', 'unit_number',
         'unit_type', 'unit_total_area',
         'unit_house_type', 'status',
-        'charge', 'date'
+        'recordtion',
+        'charge', 'address'
     ]
 
     attachment = scrapy.Field(
@@ -54,6 +58,18 @@ class GovMcItem(scrapy.Item, MysqlItem):
     date = scrapy.Field(
         output_processor=FirstAndTrim()
     )
+    building = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    building_id = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    address = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    recordtion = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
 
     status_enums = {
         '不可销售': 0,
@@ -67,6 +83,7 @@ class GovMcItem(scrapy.Item, MysqlItem):
     unit_type_enums = {
         '其他': 1,
         '住宅': 2,
+        '商业': 3,
     }
 
     def clean_data(self):
@@ -76,6 +93,7 @@ class GovMcItem(scrapy.Item, MysqlItem):
         # self['unit_total_area'] = float(self['unit_total_area'])
         self['unit_number'] = int(self['unit_number'])
         self['unit_type'] = self.unit_type_enums[self['unit_type']]
+        self['recordtion'] = int(self['recordtion'])
 
         self['date'] = str(datetime.date.today())
 
