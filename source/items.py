@@ -49,7 +49,7 @@ class MysqlItem(BaseItem):
     duplicate_key_update = []  # "重复插入时，需要更新的字段"
 
     @abstractmethod
-    def save_to_mysql(self):
+    def save_to_mysql(self, clean=True):
         """
         生成插入数据库的sql语句
         :return:

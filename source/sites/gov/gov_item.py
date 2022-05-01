@@ -90,9 +90,10 @@ class GovProjectItem(scrapy.Item, MysqlItem):
         self['update_time'] = int(time.time())
         # logger.info('[clean] [after] %s', self)
 
-    def save_to_mysql(self):
+    def save_to_mysql(self, clean=True):
         insert_sql, params_eval, _, _ = create_insert_sql(self.field_list, self.duplicate_key_update, self.table_name)
-        self.clean_data()
+        if clean:
+            self.clean_data()
         sql_params = eval(params_eval)
 
         return insert_sql, sql_params

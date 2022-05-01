@@ -4,16 +4,12 @@ __date__ = '22/04/21 14:49'
 # -*- coding: utf-8 -*-
 import re
 import urllib
-from datetime import datetime
-import js2xml
-from js2xml.utils.vars import get_vars
 import scrapy
 from urllib import parse
 from scrapy.loader import ItemLoader
 from source.sites.gov.gov_item import GovProjectItem
 from source.sites.gov.gov_mc_item import GovMcItem
 import logging
-import time
 import scrapy
 from scrapy.selector import Selector
 from source.utils.strings_utils import rsa_encrypt
@@ -260,6 +256,7 @@ class ZfcjGzGovSpider(scrapy.Spider):
         try:
             area = building[0]
             area_number = building[1:]
+
         except ValueError:
             pass
         address = item['address']

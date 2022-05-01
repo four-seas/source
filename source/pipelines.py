@@ -74,8 +74,8 @@ class MysqlTwistedPipeline(object):
 
     @staticmethod
     def handle_error(failure, item):
-        # insert_sql, params = item.save_to_mysql()
-
-        # print(insert_sql, params)
+        insert_sql, params = item.save_to_mysql(clean=False)
+        #
+        print(insert_sql, params)
         # 处理异步插入的异常
         print(failure)
