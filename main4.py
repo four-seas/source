@@ -18,7 +18,7 @@ if __name__ == '__main__':
     excel_file = f'(阳光家缘)中央城数据统计-{cur_date}.xlsx'
     workbook = xlsxwriter.Workbook(excel_file)
 
-    db = MySQLdb.connect(host="127.0.0.1", port=3306, db="gov", user="root", password="sb250!@#", charset='utf8')
+    db = MySQLdb.connect(host="127.0.0.1", port=3306, db="gov", user="root", password="123456", charset='utf8')
 
     # cursor = db.cursor(MySQLdb.cursors.DictCursor)
     cursor = db.cursor()
