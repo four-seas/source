@@ -98,6 +98,7 @@ class GovMcItem(scrapy.Item, MysqlItem):
         '其他': 1,
         '住宅': 2,
         '商业': 3,
+        '车位': 4,
     }
 
     def clean_data(self):
