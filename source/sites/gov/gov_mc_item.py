@@ -33,7 +33,8 @@ class GovMcItem(scrapy.Item, MysqlItem):
         'recordtion',
         'charge', 'address',
         'area',
-        'area_number'
+        'area_number',
+        'licence'
     ]
 
     attachment = scrapy.Field(
