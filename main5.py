@@ -34,39 +34,39 @@ if __name__ == '__main__':
     # 总备案统计
     worksheets = []
     worksheets.append(workbook.add_worksheet('当天各幢备案统计'))
-    worksheets.append(workbook.add_worksheet('各幢备案统计'))
+    worksheets.append(workbook.add_worksheet('所有幢备案汇总'))
     worksheets.append(workbook.add_worksheet('对比昨天新增备案户'))
     worksheets.append(workbook.add_worksheet('对比昨天新增备数量'))
     worksheets.append(workbook.add_worksheet('累户已备案业主'))
-    worksheets.append(workbook.add_worksheet('各幢抵押统计'))
-    worksheets.append(workbook.add_worksheet('监管信息'))
+    worksheets.append(workbook.add_worksheet('查看已出预售证监管账号'))
 
     sqls = []
     sql = """
 -- 当天各幢备案统计
-select 
-  building as 幢, 
-  recordtion as '(0=未备案，1=已备案)是否备案', 
-  count(1) as '(未/已)备案数' 
-from 
-  market_control 
-where 
-  unit_type = 2 
-  and `date` = curdate() 
-group by 
-  recordtion, 
-  building 
-order by 
-  recordtion desc, 
-  building asc;
+SELECT building AS '幢', GROUP_CONCAT(nc) AS '统计结果'
+FROM (
+	SELECT building, concat(CASE recordtion
+			WHEN 0 THEN '未备案'
+			ELSE '已备案'
+		END, ':', c) AS nc
+	FROM (
+		SELECT building, recordtion, COUNT(1) AS c
+		FROM market_control
+		WHERE unit_type = 2
+			AND `date` = curdate()
+		GROUP BY recordtion, building
+		ORDER BY recordtion DESC, building ASC
+	) a
+) b
+GROUP BY building
     """
     sqls.append(sql)
 
     sql = """
 -- 所有幢备案汇总
 select 
-  recordtion as '(0=未备案，1=已备案)是否备案', 
-  count(1) as '(未/已)备案数' 
+  case recordtion when 0 then '未备案' else '已备案' end as '备案情况', 
+  count(1) as '数量' 
 from 
   market_control 
 where 
@@ -151,35 +151,36 @@ order by
     sqls.append(sql)
 
     sql = """
--- 各抵押统计
-SELECT building AS '幢', charge AS '(0=未抵押, 1=已抵押)', COUNT(1) AS '(未/已)抵押数'
-FROM market_control
-WHERE unit_type = 2
-	AND `status` = 0
-	AND `date` = curdate()
-GROUP BY charge, building
-ORDER BY charge DESC, building ASC
+-- 各栋抵押统计
+SELECT building as '幢', GROUP_CONCAT(nc)  as '统计结果'
+FROM (
+	SELECT building, concat(CASE charge
+			WHEN 1 THEN '已抵押'
+			ELSE '未抵押'
+		END, ':', c) AS nc
+	FROM (
+		SELECT building, charge, COUNT(1) AS c
+		FROM market_control
+		WHERE unit_type = 2
+			AND `status` = 0
+			AND `date` = curdate()
+		GROUP BY charge, building
+		ORDER BY charge DESC, building ASC
+	) a
+) b
+GROUP BY building;
         """
     sqls.append(sql)
 
     sql = """
--- 监管信息
-SELECT a1.licence AS '预售证', b1.building AS '幢'
-	, CASE a1.charge
-		WHEN '{}' THEN '暂无'
-		ELSE a1.charge
-	END AS '监管账号', a1.address AS '项目地址'
-FROM project a1
-	RIGHT JOIN (
-		SELECT b.licence, b.building
-		FROM project a
-			RIGHT JOIN market_control b ON a.licence = b.licence
-		WHERE b.date = curdate()
-			AND unit_type = 2
-		GROUP BY b.licence, b.building
-	) b1
-	ON a1.licence = b1.licence
-ORDER BY a1.licence
+-- 查看已出预售证监管账号
+select 
+  address '地址', 
+  charge as '监管账号' 
+from 
+  project 
+where 
+  licence > 0;
     """
     sqls.append(sql)
 

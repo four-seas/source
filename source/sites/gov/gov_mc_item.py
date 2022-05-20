@@ -22,7 +22,8 @@ class GovMcItem(scrapy.Item, MysqlItem):
         'address',
         'recordtion',
         'area',
-        'area_number'
+        'area_number',
+        'licence'
     ]
 
     duplicate_key_update = [
@@ -78,6 +79,9 @@ class GovMcItem(scrapy.Item, MysqlItem):
         output_processor=FirstAndTrim()
     )
     area_number = scrapy.Field(
+        output_processor=FirstAndTrim()
+    )
+    licence = scrapy.Field(
         output_processor=FirstAndTrim()
     )
 

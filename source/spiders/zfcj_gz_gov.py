@@ -250,14 +250,18 @@ class ZfcjGzGovSpider(scrapy.Spider):
         item = response.meta
         pid = item['projectId']
         building_id = item['building_id']
+        licence = item['presell']
         building = item['building'] if str(item['building_id']) != '100000121046' else 'J3'
         area = ''
         area_number = '0'
         try:
             area = building[0]
             area_number = building[1:]
-
-        except ValueError:
+            try:
+                int(area_number)
+            except ValueError:
+                area_number = '0'
+        except:
             pass
         address = item['address']
         beian_list = item['beian_list']
@@ -290,5 +294,6 @@ class ZfcjGzGovSpider(scrapy.Spider):
             for key in m:
                 if key in m.keys():
                     item_loader.add_value(key, item[m[key]])
+            item_loader.add_value('licence', licence)
             it = item_loader.load_item()
             yield it
